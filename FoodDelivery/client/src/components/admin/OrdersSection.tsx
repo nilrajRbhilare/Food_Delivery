@@ -73,6 +73,7 @@ export function OrdersSection() {
   };
 
   const updateOrderStatus = (orderId: string, newStatus: "new" | "preparing" | "ready" | "delivered" | "denied") => {
+    // Update admin orders tracking
     const savedOrders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || '{}');
     savedOrders[orderId] = { 
       ...(savedOrders[orderId] || {}), 
@@ -80,13 +81,55 @@ export function OrdersSection() {
     };
     localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify(savedOrders));
     
+    // Update the user's order in their profile so they see real-time updates
+    const statusMapping = {
+      "new": "New",
+      "preparing": "Preparing",
+      "ready": "On the Way",
+      "delivered": "Delivered",
+      "denied": "Denied"
+    };
+    
+    const allUsers = JSON.parse(localStorage.getItem('foodhub_users') || '[]');
+    let updated = false;
+    
+    allUsers.forEach((user: any) => {
+      if (user.orders && Array.isArray(user.orders)) {
+        user.orders = user.orders.map((order: Order) => {
+          if (order.id === orderId) {
+            updated = true;
+            return { ...order, status: statusMapping[newStatus] as Order['status'] };
+          }
+          return order;
+        });
+      }
+    });
+    
+    if (updated) {
+      localStorage.setItem('foodhub_users', JSON.stringify(allUsers));
+    }
+    
     setOrders(prev => prev.map(order => 
       order.id === orderId ? { ...order, orderStatus: newStatus } : order
     ));
     
+    // Show descriptive toast messages
+    let toastMessage = '';
+    if (newStatus === "preparing") {
+      toastMessage = "Order accepted and moved to Preparing";
+    } else if (newStatus === "ready") {
+      toastMessage = "Order marked as Ready for delivery";
+    } else if (newStatus === "delivered") {
+      toastMessage = "Order marked as Delivered";
+    } else if (newStatus === "denied") {
+      toastMessage = "Order denied and customer notified";
+    } else {
+      toastMessage = `Order status changed to ${newStatus}`;
+    }
+    
     toast({
       title: "Order Updated",
-      description: `Order status changed to ${newStatus}`,
+      description: toastMessage,
       variant: newStatus === "denied" ? "destructive" : "default",
     });
   };

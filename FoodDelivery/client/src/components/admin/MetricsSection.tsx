@@ -62,7 +62,10 @@ export function MetricsSection() {
 
     const endDate = timeRange === "custom" && customEndDate ? new Date(customEndDate) : now;
 
-    const ordersInRange: any[] = [];
+    // Only count orders that have been accepted (not "New")
+    // Revenue only counts from "Delivered" orders
+    const acceptedOrders: any[] = [];
+    const deliveredOrders: any[] = [];
     const itemCounts: Record<string, number> = {};
 
     allUsers.forEach((user: any) => {
@@ -72,9 +75,20 @@ export function MetricsSection() {
           const isRestaurantMatch = !currentRestaurantId || order.restaurantId === currentRestaurantId || !order.restaurantId;
           const orderDate = order.orderDate ? new Date(order.orderDate) : new Date();
           
-          if (isRestaurantMatch && orderDate >= startDate && orderDate <= endDate) {
-            ordersInRange.push({ ...order, date: orderDate });
+          // Only count orders that admin has accepted (not "New" or "Denied")
+          // Accepted statuses: "Preparing", "On the Way", "Delivered"
+          const acceptedStatuses = ["Preparing", "On the Way", "Delivered"];
+          const isAccepted = acceptedStatuses.includes(order.status);
+          
+          if (isRestaurantMatch && orderDate >= startDate && orderDate <= endDate && isAccepted) {
+            acceptedOrders.push({ ...order, date: orderDate });
             
+            // Only count delivered orders for revenue
+            if (order.status === "Delivered") {
+              deliveredOrders.push({ ...order, date: orderDate });
+            }
+            
+            // Count items from all accepted orders (not just delivered)
             if (order.items && Array.isArray(order.items)) {
               order.items.forEach((item: string) => {
                 itemCounts[item] = (itemCounts[item] || 0) + 1;
@@ -85,8 +99,9 @@ export function MetricsSection() {
       }
     });
 
+    // Chart data based on delivered orders for revenue
     const dailyData: Record<string, OrderData> = {};
-    ordersInRange.forEach(order => {
+    deliveredOrders.forEach(order => {
       const dateKey = order.date.toISOString().split('T')[0];
       if (!dailyData[dateKey]) {
         dailyData[dateKey] = { date: dateKey, revenue: 0, orders: 0 };
@@ -99,7 +114,10 @@ export function MetricsSection() {
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
-    const revenue = ordersInRange.reduce((sum, order) => sum + (order.total || 0), 0);
+    // Total revenue only from delivered orders
+    const revenue = deliveredOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+    
+    // Total orders count all accepted orders (preparing, ready, delivered)
     const topItemsData = Object.entries(itemCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
@@ -107,7 +125,7 @@ export function MetricsSection() {
 
     setMetrics(chartData);
     setTotalRevenue(revenue);
-    setTotalOrders(ordersInRange.length);
+    setTotalOrders(acceptedOrders.length);
     setTopItems(topItemsData);
   };
 
