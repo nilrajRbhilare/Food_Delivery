@@ -92,7 +92,7 @@ export default function TrackOrder() {
                       <Package className="h-5 w-5" />
                       Current Order - {currentOrder.id}
                     </CardTitle>
-                    <Badge variant="outline" className={statusConfig[currentOrder.status].bgColor}>
+                    <Badge variant="outline" className={statusConfig[currentOrder.status]?.bgColor || "bg-gray-100 dark:bg-gray-950"}>
                       {currentOrder.status}
                     </Badge>
                   </div>
@@ -131,7 +131,10 @@ export default function TrackOrder() {
                     <p className="font-medium">Order Status</p>
                     <div className="flex items-center justify-between gap-4">
                       {(["Preparing", "On the Way", "Delivered"] as const).map((status, idx) => {
-                        const StatusIcon = statusConfig[status].icon;
+                        const config = statusConfig[status];
+                        if (!config) return null;
+                        
+                        const StatusIcon = config.icon;
                         const isActive = currentOrder.status === status;
                         const isPast = orders.indexOf(currentOrder) !== -1 && 
                           (status === "Preparing" || 
@@ -140,10 +143,10 @@ export default function TrackOrder() {
                         return (
                           <div key={status} className="flex-1 flex items-center gap-2">
                             <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                              isActive || isPast ? statusConfig[status].bgColor : "bg-muted"
+                              isActive || isPast ? config.bgColor : "bg-muted"
                             }`}>
                               <StatusIcon className={`h-5 w-5 ${
-                                isActive || isPast ? statusConfig[status].color : "text-muted-foreground"
+                                isActive || isPast ? config.color : "text-muted-foreground"
                               }`} />
                             </div>
                             <div className="flex-1">
@@ -170,7 +173,7 @@ export default function TrackOrder() {
                     <CardHeader>
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <CardTitle className="text-lg">{order.id}</CardTitle>
-                        <Badge variant="outline" className={statusConfig[order.status].bgColor}>
+                        <Badge variant="outline" className={statusConfig[order.status]?.bgColor || "bg-gray-100 dark:bg-gray-950"}>
                           {order.status}
                         </Badge>
                       </div>
