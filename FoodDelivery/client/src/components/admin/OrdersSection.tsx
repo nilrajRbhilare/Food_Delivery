@@ -12,7 +12,7 @@ interface OrderWithStatus extends Order {
   ticketId: string;
   customerName: string;
   customerEmail: string;
-  orderStatus: "new" | "preparing" | "ready" | "delivered";
+  orderStatus: "new" | "preparing" | "ready" | "delivered" | "denied";
   itemsOutOfStock?: string[];
 }
 
@@ -63,14 +63,16 @@ export function OrdersSection() {
     setOrders(mergedOrders);
   };
 
-  const getOrderStatusFromStatus = (status: string): "new" | "preparing" | "ready" | "delivered" => {
+  const getOrderStatusFromStatus = (status: string): "new" | "preparing" | "ready" | "delivered" | "denied" => {
+    if (status === "New") return "new";
     if (status === "Preparing") return "preparing";
     if (status === "On the Way") return "ready";
     if (status === "Delivered") return "delivered";
+    if (status === "Denied") return "denied";
     return "new";
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: "new" | "preparing" | "ready" | "delivered") => {
+  const updateOrderStatus = (orderId: string, newStatus: "new" | "preparing" | "ready" | "delivered" | "denied") => {
     const savedOrders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || '{}');
     savedOrders[orderId] = { 
       ...(savedOrders[orderId] || {}), 
@@ -85,6 +87,7 @@ export function OrdersSection() {
     toast({
       title: "Order Updated",
       description: `Order status changed to ${newStatus}`,
+      variant: newStatus === "denied" ? "destructive" : "default",
     });
   };
 
@@ -114,7 +117,7 @@ export function OrdersSection() {
     if (status === "new") return orders.filter(o => o.orderStatus === "new");
     if (status === "preparing") return orders.filter(o => o.orderStatus === "preparing");
     if (status === "ready") return orders.filter(o => o.orderStatus === "ready");
-    if (status === "past") return orders.filter(o => o.orderStatus === "delivered");
+    if (status === "past") return orders.filter(o => o.orderStatus === "delivered" || o.orderStatus === "denied");
     return orders;
   };
 
@@ -166,10 +169,16 @@ export function OrdersSection() {
         
         <div className="flex gap-2 pt-2 flex-wrap">
           {order.orderStatus === "new" && (
-            <Button size="sm" onClick={() => updateOrderStatus(order.id, "preparing")} data-testid={`button-accept-${order.id}`}>
-              <Check className="mr-1 h-3 w-3" />
-              Accept
-            </Button>
+            <>
+              <Button size="sm" onClick={() => updateOrderStatus(order.id, "preparing")} data-testid={`button-accept-${order.id}`}>
+                <Check className="mr-1 h-3 w-3" />
+                Accept
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => updateOrderStatus(order.id, "denied")} data-testid={`button-deny-${order.id}`}>
+                <X className="mr-1 h-3 w-3" />
+                Deny
+              </Button>
+            </>
           )}
           {order.orderStatus === "preparing" && (
             <Button size="sm" onClick={() => updateOrderStatus(order.id, "ready")} data-testid={`button-ready-${order.id}`}>

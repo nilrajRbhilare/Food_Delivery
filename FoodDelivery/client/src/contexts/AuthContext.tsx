@@ -7,7 +7,7 @@ interface Order {
   total: number;
   restaurant: string;
   restaurantId?: string;
-  status: "Preparing" | "On the Way" | "Delivered";
+  status: "New" | "Preparing" | "On the Way" | "Delivered" | "Denied";
   deliveryDate: string;
   deliveryTime: string;
   paymentMethod?: string;

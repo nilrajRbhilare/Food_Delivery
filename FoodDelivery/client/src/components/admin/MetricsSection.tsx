@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { DollarSign, ShoppingCart, TrendingUp, Calendar } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface OrderData {
   date: string;
@@ -14,6 +15,7 @@ interface OrderData {
 }
 
 export function MetricsSection() {
+  const { adminProfile } = useAuth();
   const [timeRange, setTimeRange] = useState<"today" | "7days" | "30days" | "3months" | "6months" | "1year" | "custom">("7days");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
@@ -24,10 +26,11 @@ export function MetricsSection() {
 
   useEffect(() => {
     calculateMetrics();
-  }, [timeRange, customStartDate, customEndDate]);
+  }, [timeRange, customStartDate, customEndDate, adminProfile]);
 
   const calculateMetrics = () => {
     const allUsers = JSON.parse(localStorage.getItem('foodhub_users') || '[]');
+    const currentRestaurantId = adminProfile?.restaurantId;
     const now = new Date();
     let startDate = new Date();
 
@@ -65,9 +68,11 @@ export function MetricsSection() {
     allUsers.forEach((user: any) => {
       if (user.orders && Array.isArray(user.orders)) {
         user.orders.forEach((order: any) => {
+          // Only include orders for this admin's restaurant
+          const isRestaurantMatch = !currentRestaurantId || order.restaurantId === currentRestaurantId || !order.restaurantId;
           const orderDate = order.orderDate ? new Date(order.orderDate) : new Date();
           
-          if (orderDate >= startDate && orderDate <= endDate) {
+          if (isRestaurantMatch && orderDate >= startDate && orderDate <= endDate) {
             ordersInRange.push({ ...order, date: orderDate });
             
             if (order.items && Array.isArray(order.items)) {

@@ -109,7 +109,7 @@ export default function Payment({ items = [], onClearCart }: PaymentProps) {
       total: finalTotal,
       restaurant: restaurantName,
       restaurantId: restaurantId,
-      status: "Preparing" as const,
+      status: "New" as const,
       deliveryDate,
       deliveryTime,
       paymentMethod,
