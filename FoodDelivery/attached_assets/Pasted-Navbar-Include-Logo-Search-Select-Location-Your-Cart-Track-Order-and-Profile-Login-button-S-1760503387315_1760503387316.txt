@@ -1,0 +1,91 @@
+Navbar
+
+Include: Logo, Search, Select Location, Your Cart, Track Order, and Profile/Login button.
+
+Select Location: when user types a location, it should be shown on a live map (use mock Google Maps integration for frontend).
+
+After successful login or registration, show Profile instead of Login, and allow the user to view or edit profile data.
+
+On logout, all user-related data (profile info, cart, and track orders) should be cleared and no longer visible.
+
+👤 Login & Registration
+
+When a user logs in or registers, save their credentials and details temporarily in a JSON file (or localStorage JSON).
+
+If user is not logged in, restrict them from ordering and redirect to login/register.
+
+Each registered user should have their own record in the JSON including:
+
+Username
+
+Email
+
+Password
+
+Order history (updated dynamically)
+
+🛒 Your Cart
+
+Show added items with quantity, price, and total.
+
+Always include Delivery Charges in total calculation (fix the issue where it sometimes doesn’t apply).
+
+Rename “Proceed to Checkout” → “Order”.
+
+When clicked, if the user isn’t logged in, show the login/register modal first.
+
+After successful login, redirect to the Payment Page.
+
+💳 Payment Page
+
+Display total amount including delivery charges.
+
+Add Coupon Field to apply valid codes (e.g., FOOD10, SAVE50) to update total dynamically.
+
+Payment options: Cash on Delivery, UPI, Banking.
+
+On payment success:
+
+Show a popup “✅ Order Placed Successfully!”.
+
+Provide buttons:
+
+Order More → redirect to food listing page.
+
+Track Order → redirect to the Track Order page.
+
+The placed order should be saved to the logged-in user’s JSON record, including:
+
+Order ID
+
+Items
+
+Date
+
+Total (with delivery + coupon discount)
+
+Status (Pending, On the Way, Delivered)
+
+🚚 Track Order Page
+
+No dummy data — display only actual orders placed by the currently logged-in user from the JSON data.
+
+Each user’s order history must be maintained separately.
+
+When the user logs out, all order and user details must disappear from the UI.
+
+Show order details (status, date, amount, delivery progress, etc.) in an attractive, responsive design.
+
+🧩 Requirements Summary
+
+No backend or database — use localStorage or in-memory JSON only.
+
+Maintain per-user order history within JSON.
+
+Fix delivery charge calculation issue.
+
+Fix all unclosed or misaligned tags in the UI.
+
+Ensure smooth navigation and state handling using React Router + Context API.
+
+Provide a modern, responsive, and visually appealing UI throughout.

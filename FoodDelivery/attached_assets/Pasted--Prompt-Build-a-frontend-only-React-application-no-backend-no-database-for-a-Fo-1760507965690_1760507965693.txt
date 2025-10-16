@@ -1,0 +1,148 @@
+**Prompt:**
+
+> Build a **frontend-only React application** (⚠️ no backend, no database) for a **Food Delivery Platform with Admin Panel**, using **React Router**, **React Context or useState**, and **JSON/localStorage** to simulate data.
+>
+> ✅ **Ensure all JSX tags are properly closed and aligned** for a clean, professional UI structure.
+>
+> ---
+>
+> ### 🧭 **Navbar**
+>
+> * Include: **Logo**, **Search**, **Select Location**, **Your Cart**, **Track Order**, and **Login/Register**.
+> * During **registration**, add a **User Type selector** → options:
+>
+>   * **Customer**
+>   * **Admin (Delivery Partner)**
+> * If a user selects **Admin** at registration, redirect them to the **Delivery Partner Login Page** after successful registration.
+> * When admin logs in with valid credentials (stored in JSON/localStorage), redirect them to the **Admin Dashboard Panel**.
+>
+> ---
+>
+> ### 🧑‍💼 **Admin Panel Overview**
+>
+> * Layout:
+>
+>   * **Top Navbar** → shows admin details
+>   * **Sidebar Navigation** → contains links for Orders, Menu, Offers, Metrics, and Help
+>   * **Main Content Area** → displays selected section
+>
+> ---
+>
+> ### 🏢 **Navbar (Inside Admin Panel)**
+>
+> * Display **Admin Details** such as:
+>
+>   * Restaurant Name
+>   * Restaurant ID
+>   * Branches
+>   * Location
+>   * Contact Info
+>   * Manager Name
+>   * Current Login Status
+> * Provide **Edit Info** functionality (updates stored in JSON/localStorage).
+>
+> ---
+>
+> ### 📦 **Sidebar → Orders Section**
+>
+> * Show a list of all orders stored in JSON (generated when users place orders).
+> * Each order should include:
+>
+>   * **Ticket ID (auto-generated)**
+>   * **Customer Name**
+>   * **Items Ordered**
+>   * **Total Amount**
+>   * **Delivery Address**
+>   * **Order Date & Time**
+>   * **Order Status:**
+>
+>     * New
+>     * Preparing
+>     * Ready
+>     * Past Orders (Completed/Delivered)
+> * Admin should be able to:
+>
+>   * **Accept Order**
+>   * **Mark as Preparing / Ready / Delivered**
+>   * **Mark Item as Out of Stock**
+> * Order updates must reflect instantly in the JSON/local state (no backend).
+>
+> ---
+>
+> ### 🍽️ **Sidebar → Menu Section**
+>
+> * Display all menu items grouped by:
+>
+>   * **Category** (e.g., Indian, Chinese, Desserts, Beverages)
+>   * **Subcategory** (e.g., Veg, Non-Veg, Ice Cream, Coffee, etc.)
+> * Show each item’s:
+>
+>   * Name
+>   * Price
+>   * Availability Status
+> * Admin can:
+>
+>   * **Add New Category/Subcategory**
+>   * **Add New Item** (name, category, subcategory, price)
+>   * **Edit or Delete Existing Items**
+>   * Changes reflect immediately in JSON/localStorage.
+>
+> ---
+>
+> ### 🎁 **Sidebar → Offers Section**
+>
+> * Allow admin to create and manage offers:
+>
+>   * Apply discount on **entire menu** or **specific items/categories**.
+>   * Define:
+>
+>     * Offer Title
+>     * Discount Percentage
+>     * Start/End Date
+>     * Eligible Items
+>   * Display all active offers in a list view.
+>   * Admin can edit, delete, or deactivate offers.
+>
+> ---
+>
+> ### 📊 **Sidebar → Metrics Section**
+>
+> * Create a **Business Analytics Dashboard** showing sales data from orders in JSON.
+> * Display metrics for:
+>
+>   * **Today’s Sales**
+>   * **Last 7 Days**
+>   * **Last 30 Days**
+>   * **3 Months**, **6 Months**, **1 Year**
+>   * **Custom Date Range** (start–end date input fields)
+> * Show **real-time charts** (use libraries like Recharts or Chart.js) to visualize:
+>
+>   * Total revenue
+>   * Number of orders
+>   * Top-selling items
+>   * Sales trends over time
+> * Charts should update automatically when new orders are placed (based on JSON data).
+>
+> ---
+>
+> ### 🆘 **Sidebar → Help Section**
+>
+> * Provide helpful guides for admin operations, including:
+>
+>   * “How to Add Menu Items”
+>   * “How to Manage Orders”
+>   * “How to Track Sales Metrics”
+>   * “How to Create Offers”
+> * Include contact or feedback form (frontend only, no backend submission).
+>
+> ---
+>
+> ### 🧩 **Technical Requirements Summary**
+>
+> * Entire app should work **without backend or database** — use **React state and localStorage JSON** only.
+> * Each **Admin** and **Customer** has separate JSON data maintained in localStorage.
+> * Admin panel is **role-protected** — only accessible after valid admin login.
+> * Fix **all unclosed or misaligned tags** and ensure consistent indentation.
+> * Fully **responsive** and **modern UI**, with animated transitions for sidebar and sections.
+> * Navigation handled via **React Router DOM**.
+> * Use **React Context** or **props drilling** to manage global state for user and admin data.

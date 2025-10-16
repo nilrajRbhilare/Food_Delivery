@@ -1,0 +1,160 @@
+Prompt for React Frontend UI:
+
+Create a responsive and modern food delivery frontend UI using React (no backend, no authentication). The application should include the following sections and interactions:
+
+1️⃣ Navbar
+
+Include:
+
+Logo on the left side.
+
+Location Dropdown:
+
+When the customer clicks, open a dropdown that allows them to:
+
+Select current location (use a placeholder like “Use Current Location”).
+
+Type full address manually.
+
+See suggested saved addresses (like “Home”, “Work”).
+
+Use a beautiful modal or dropdown with icons and smooth animation.
+
+Search Bar in the center:
+
+Customers can search any food item or restaurant.
+
+Show live suggestions while typing (static list for now).
+
+Offers link/button:
+
+When clicked, open a section or modal showing current offer deals with attractive cards (discount %, food image, short description).
+
+Sign In / Sign Up button:
+
+When clicked, open a popup/modal with two tabs: Sign In and Sign Up forms (UI only, no backend).
+
+Include smooth transitions and hover effects.
+
+Cart Icon with item count badge:
+
+When food is added, show it dynamically in the cart dropdown (title, price, quantity, total).
+
+Use smooth slide-in animation for cart preview.
+
+2️⃣ Main Section
+Filter Bar
+
+Add a filter section with toggle buttons and dropdowns for:
+
+✅ Only Veg
+
+💰 Price Range (less than ₹100, ₹200, ₹500, etc.)
+
+📍 Nearby
+
+⭐ Based on Ratings
+
+🎁 Offers Available
+
+💸 Cost (Low to High / High to Low)
+
+Filters should update the displayed food cards dynamically (frontend-only).
+
+Use icons and highlight active filters with color transitions.
+
+Food Display Section
+
+Create category-wise horizontal sections like:
+
+🍜 Chinese
+
+🍛 Indian
+
+🍕 Pizza & Fast Food
+
+🍦 Ice Creams
+
+🍔 Popular Brands (McDonald’s, Pizza Hut, Domino’s, Subway, KFC)
+
+🌱 Only Veg Restaurants
+
+⭐ 5-Star Hotels / Premium Dining
+
+Each section should have a horizontal scroll (carousel-style) with beautiful food cards.
+
+Food Card Design
+
+Each card should include:
+
+Food Image
+
+Restaurant Name
+
+Rating (star icons)
+
+Price
+
+Offer Tag (if available)
+
+“Add to Cart” button with hover animation
+
+On clicking a food card:
+
+Open a detailed modal/page showing:
+
+Restaurant name
+
+Rating
+
+Price
+
+Food description
+
+“Add to Cart” button
+
+Comment section (UI only) where user can type a comment
+
+Use fade-in animation for modal.
+
+3️⃣ UI / UX Requirements
+
+Use modern, attractive design with:
+
+Gradient backgrounds
+
+Box shadows
+
+Hover effects
+
+Smooth transitions
+
+Rounded cards and buttons
+
+Fully responsive for desktop, tablet, and mobile view.
+
+Use Tailwind CSS or Styled Components for styling.
+
+Use Framer Motion for animations (optional).
+
+Keep layout clean, interactive, and visually appealing.
+
+4️⃣ Additional Frontend Touches
+
+Sticky Navbar while scrolling.
+
+Add a “Back to Top” floating button.
+
+Add a “Loading shimmer” effect when data loads.
+
+Add light and dark mode toggle (optional).
+
+Use icons from Lucide React or React Icons.
+
+Output Expectation:
+
+Deliver complete React frontend code for all the above.
+
+No backend or API — use static arrays or dummy data for food, offers, and restaurants.
+
+Make the UI polished, aesthetic, and fully responsive with animations and hover effects.

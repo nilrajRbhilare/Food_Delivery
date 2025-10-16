@@ -1,0 +1,120 @@
+**Prompt:**
+
+> Build a **frontend-only React application** (⚠️ no backend, no database) for a **Food Delivery Platform with Connected User & Admin Panels**, using **React Router**, **React Context / useState**, and **JSON/localStorage** for all data storage and syncing.
+>
+> ✅ **Ensure all JSX tags are properly closed and aligned** for a clean, readable, and error-free structure.
+>
+> ---
+>
+> ### 🧭 **Registration & Login System**
+>
+> * During **registration**, add a **user type selector** with two options:
+>
+>   * **Customer**
+>   * **Admin (Delivery Partner)**
+> * If the user selects **Admin (Delivery Partner)**, show additional input fields:
+>
+>   * **Restaurant Name**
+>   * **Restaurant ID (auto-generate unique ID)**
+>   * **Restaurant Location** (with live map selector where admin can pinpoint restaurant location)
+> * All registration details (for both customers and admins) should be saved in **JSON/localStorage**.
+> * When an **Admin** logs in → redirect to **Admin Dashboard Panel**.
+> * When a **Customer** logs in → redirect to **User Home Page**.
+>
+> ---
+>
+> ### 🔗 **User ↔ Admin Panel Connection**
+>
+> * Each **admin (restaurant)** has their own **menu, offers, and orders** section in JSON.
+> * When a **customer orders an item**, that order should automatically:
+>
+>   * Appear in the **Track Order** page for the user.
+>   * Reflect in the **Orders section** of the **corresponding restaurant’s admin panel** (based on restaurant ID).
+> * When an **admin adds or updates menu items or offers**, those updates should:
+>
+>   * Instantly appear on the **user’s side**, under that restaurant’s food listings and offers section.
+> * Use **shared JSON data (localStorage)** to sync between user and admin panels in real-time (simulated).
+>
+> ---
+>
+> ### 🧑‍💼 **Admin Panel**
+>
+> * **Navbar:**
+>
+>   * Show restaurant details: Name, ID, Location, Contact Info.
+>   * Add “Edit Restaurant Info” option (updates stored in JSON).
+> * **Sidebar:**
+>
+>   1. **Orders Section:**
+>
+>      * Display all incoming orders for this restaurant.
+>      * Each order includes:
+>
+>        * Ticket ID (auto-generated)
+>        * Customer Name, Contact, and Delivery Address
+>        * Ordered Items, Price, Date, and Status (New, Preparing, Ready, Delivered)
+>      * Admin can **Accept Order**, **Update Status**, or **Mark Item Out of Stock**.
+>      * Changes should update in both the admin’s JSON and the corresponding user’s Track Order section.
+>   2. **Menu Section:**
+>
+>      * Display all menu items **category- and subcategory-wise**.
+>      * Each item includes:
+>
+>        * Name
+>        * Category
+>        * Subcategory
+>        * Price
+>        * Image (✅ Add image upload or URL field for new items)
+>        * Availability Status
+>      * Admin can:
+>
+>        * **Add new categories/subcategories**
+>        * **Add/Edit/Delete items** (reflected on the user side instantly)
+>   3. **Offers Section:**
+>
+>      * Admin can create and manage offers:
+>
+>        * Apply on entire menu, category, or specific items.
+>        * Include: Offer Name, Discount %, Validity Dates, and Description.
+>      * Offers appear on the **user side** under the restaurant’s offers section.
+>   4. **Metrics Section:**
+>
+>      * Display business stats using **charts (Recharts or Chart.js)**.
+>      * Metrics include:
+>
+>        * Today’s Sales
+>        * Last 7 Days, 30 Days, 3 Months, 6 Months, 1 Year
+>        * Custom date range
+>      * Data calculated from orders in JSON.
+>   5. **Help Section:**
+>
+>      * Provide a simple guide about order management, menu setup, offers, and metrics.
+>
+> ---
+>
+> ### 🍔 **User Panel (Customer Side)**
+>
+> * Users can:
+>
+>   * Search restaurants, foods, or offers.
+>   * View restaurant menus and offers synced from admin data (JSON).
+>   * Add items to cart and place orders.
+> * At checkout:
+>
+>   * Include **delivery charges** and apply coupons.
+>   * On successful payment, generate an order record stored in JSON under both:
+>
+>     * The **user’s order history**, and
+>     * The **respective restaurant admin’s order list**.
+> * **Track Order Page:** shows real-time order updates (status synced with admin panel).
+>
+> ---
+>
+> ### 🧩 **Technical Requirements**
+>
+> * Use **React Context or useState** for state management.
+> * Store all data (users, admins, menus, offers, orders) in **JSON/localStorage** only.
+> * Ensure **role-based navigation** (user vs. admin).
+> * Fix all **JSX closing tags and indentation**.
+> * Make UI **fully responsive**, modern, and interactive (use Tailwind or Material UI).
+> * Simulate real-time syncing between user and admin panels using **state updates + shared JSON** (no backend).

@@ -1,0 +1,125 @@
+1️⃣ Navbar
+Logo
+
+Display a logo on the left.
+
+Select Location
+
+Input box where the user can type full address.
+
+Include real-time map integration (Google Maps / Leaflet) to select address visually.
+
+When the user selects a location on the map, update the address input automatically.
+
+Show a dropdown of suggested addresses (use static list for now).
+
+Search Bar
+
+Input to search food items or restaurants.
+
+Implement real-time filtering of food cards based on the search text.
+
+Ensure search works across all categories dynamically on the frontend.
+
+Offers
+
+Display available offers in a dropdown or modal.
+
+Each offer card should have “Apply Offer” button.
+
+When clicked, apply the offer discount dynamically to the cart total (frontend only).
+
+Your Cart
+
+Show added food items in a cart dropdown/modal.
+
+Include:
+
+Item list (name, price, quantity)
+
+Tax field (calculate dynamically based on cart total)
+
+Coupon input (apply discount to total dynamically)
+
+Proceed to Checkout button (show a modal saying “Checkout Successful” for frontend simulation)
+
+2️⃣ Main Section
+Filter Section
+
+Filters to include:
+
+Only Veg
+
+Price range (e.g., < ₹100, ₹200, ₹500)
+
+Rating
+
+Offers available
+
+Cost low-to-high / high-to-low
+
+Filters update the displayed food cards dynamically using React state.
+
+Food Display Section
+
+Display foods category-wise (e.g., Chinese, Indian, Ice Cream, Fast Food, Brands like McDonald’s, Pizza Hut, etc.)
+
+Each food card should include:
+
+Food image (use static images for now)
+
+Food name and restaurant
+
+Price
+
+Rating
+
+Offer tag (if available)
+
+Add to Cart button (adds item dynamically to the cart)
+
+Food Card Click
+
+Open a modal showing:
+
+Food image, name, restaurant, rating, price
+
+Add to Cart button
+
+Comment section (frontend only)
+
+Add smooth animations on modal open/close.
+
+3️⃣ UI / UX
+
+Modern, attractive design using:
+
+Tailwind CSS or Styled Components
+
+Hover effects, gradient buttons, rounded cards
+
+Smooth animations and transitions (Framer Motion optional)
+
+Fully responsive for mobile, tablet, and desktop
+
+Sticky Navbar
+
+Loading shimmer effect when food cards “load” (simulate with a timeout)
+
+Optional: Light/Dark mode toggle
+
+4️⃣ Frontend Functionalities
+
+All features should work purely on the frontend using React state:
+
+Map selection updates address
+
+Search filters food cards
+
+Filters update food display dynamically
+
+Cart calculates total, tax, and coupon discounts dynamically
+
+Offers can be applied to cart dynamically
+
+Checkout button triggers a frontend modal confirmation

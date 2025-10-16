@@ -1,0 +1,67 @@
+Build a frontend-only React application (⚠️ no backend, no database) for a food delivery platform. Use React state and JSON for temporary data handling.
+
+✅ Fix all JSX closing tag issues — ensure every element and component is properly closed and the app compiles cleanly.
+
+Navbar:
+
+Include Logo, Search, Location Selector, Your Cart, and Track Order options.
+
+Track Order Page:
+
+Do not use dummy static data.
+
+When a user places an order successfully, store that order information in a local JSON file or local state (simulated JSON).
+
+Display order details such as order ID, items, total price (including delivery charges), date, and delivery status (e.g., Pending, On the Way, Delivered).
+
+Data should automatically appear in the Track Order section after a successful order.
+
+Your Cart Page:
+
+Show selected items with price, quantity, and total.
+
+Add delivery charges (e.g., ₹30) in the total amount calculation — fix this issue if missing.
+
+Rename “Proceed to Checkout” → “Order”.
+
+When the user clicks Order, check whether the user is logged in:
+
+If not logged in, open a Login/Register modal.
+
+After successful login or registration, allow the user to proceed to payment.
+
+Payment Page:
+
+Show Total Amount (including delivery charges).
+
+Add Coupon Field to apply valid discount codes (FOOD10, SAVE50, etc.) and update the total dynamically.
+
+Display Payment Methods:
+
+Cash on Delivery
+
+UPI
+
+Banking
+
+After clicking Pay, show a popup message:
+
+“✅ Order Placed Successfully!”
+
+Provide two options:
+
+Order More → navigates back to the food items page.
+
+Track Order → navigates to the Track Order page where the placed order details appear dynamically from the JSON storage.
+
+🧩 Requirements Summary:
+
+No backend or database — all data handled in React using state or JSON.
+
+Include a Login/Register modal that controls access to ordering and payment.
+
+Ensure navigation works via React Router.
+
+Use clean, valid JSX with all tags properly closed.
+
+Ensure delivery charges, coupon discounts, and order tracking updates function correctly.
