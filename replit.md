@@ -4,17 +4,24 @@
 
 FoodHub is a modern food delivery web application built with React and TypeScript. The application enables users to browse restaurants, search for food items, manage shopping carts, track orders, and complete payments. It includes a comprehensive admin panel for restaurant partners to manage their menus, orders, and offers.
 
-The application is currently implemented as a **frontend-focused prototype** with localStorage-based data persistence, simulating a full-stack application without requiring backend infrastructure. The codebase is structured to support future backend integration through its existing Drizzle ORM configuration and Express server setup.
+The application is a **frontend-only prototype** using localStorage for all data persistence. There is no backend server or database - all data is stored in the browser's localStorage as JSON.
 
 ## Recent Changes
 
-**October 16, 2025** - Successfully imported and configured for Replit environment:
+**October 16, 2025** - Converted to frontend-only Vite application:
+- ✅ Removed Express backend server and all server-side code
+- ✅ Removed database configuration (Drizzle ORM, Neon PostgreSQL)
+- ✅ Updated package.json to use Vite directly (no backend dependencies)
+- ✅ Cleaned up configuration files (vite.config.ts, tsconfig.json)
+- ✅ Updated deployment to use `vite preview` for production
+- ✅ Verified build process works correctly
+- ✅ Application uses localStorage/JSON for all data storage
+
+**Previous Setup** - Successfully imported and configured for Replit:
 - ✅ Installed Node.js 20 and all project dependencies
-- ✅ Updated vite.config.ts to allow all hosts for Replit proxy (added allowedHosts: true)
+- ✅ Updated vite.config.ts to allow all hosts for Replit proxy
 - ✅ Configured workflow to run development server on port 5000
-- ✅ Verified frontend and backend are working correctly
-- ✅ Configured deployment settings for production (autoscale with npm build)
-- ✅ Verified .gitignore has proper Node.js entries
+- ✅ Verified frontend working correctly with screenshot
 
 ## User Preferences
 
@@ -26,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 
 **Framework & Tooling:**
 - **React 18** with TypeScript for type-safe component development
-- **Vite** as the build tool and development server
+- **Vite** as the build tool and development server (no backend)
 - **Wouter** for lightweight client-side routing (regex-based route matching)
 - **TanStack Query** for data fetching and state management
 - **Framer Motion** for animations and transitions
@@ -46,7 +53,7 @@ Preferred communication style: Simple, everyday language.
 - Cross-tab synchronization via storage events
 
 **Data Persistence:**
-- **localStorage** as the primary data store (simulating database)
+- **localStorage** as the primary data store (JSON format)
 - Keys: `foodhub_users`, `foodhub_restaurants`, `foodhub_menu_items`, `foodhub_admin_offers`
 - Initialization flag pattern (`isInitialized`) to prevent race conditions
 - Real-time updates across browser tabs via storage event listeners
@@ -57,24 +64,6 @@ Preferred communication style: Simple, everyday language.
 - Order tracking with status updates
 - Live location selection with Leaflet maps
 - Admin dashboard for restaurant management
-
-### Backend Architecture
-
-**Server Setup:**
-- **Express.js** server configured to serve both API and frontend on port 5000
-- Development mode uses Vite middleware for HMR
-- Production mode serves static files from dist/public
-- API routes defined in `server/routes.ts` (ready for implementation)
-- In-memory storage interface (`IStorage`) in `server/storage.ts`
-
-**Planned Database:**
-- **Drizzle ORM** configured for PostgreSQL (schema defined but not connected)
-- Migration setup in `drizzle.config.ts`
-- Schema location: `shared/schema.ts` (currently minimal user schema)
-
-**Session Management:**
-- `connect-pg-simple` dependency included for PostgreSQL session store
-- Currently using client-side authentication with localStorage
 
 ### Routing Structure
 
@@ -117,18 +106,12 @@ Preferred communication style: Simple, everyday language.
 ### Maps & Location
 - **leaflet** - Interactive maps for location selection
 - **@types/leaflet** - TypeScript definitions
-
-### Database (Configured, Not Active)
-- **drizzle-orm** - TypeScript ORM
-- **drizzle-zod** - Zod schema generation from Drizzle
-- **@neondatabase/serverless** - Neon PostgreSQL driver
-- **connect-pg-simple** - PostgreSQL session store
+- **react-leaflet** - React bindings for Leaflet
 
 ### Build & Development
 - **vite** - Build tool and dev server
 - **@vitejs/plugin-react** - React plugin for Vite
 - **typescript** - Type system
-- **esbuild** - JavaScript bundler for production builds
 
 ### Replit Integration
 - **@replit/vite-plugin-runtime-error-modal** - Error overlay
@@ -141,28 +124,28 @@ Preferred communication style: Simple, everyday language.
 ```bash
 cd FoodDelivery && npm run dev
 ```
-- Runs on port 5000
+- Runs Vite dev server on port 5000
 - Hot module replacement enabled
-- Serves both API and frontend
+- No backend server required
 
 **Build for Production:**
 ```bash
 cd FoodDelivery && npm run build
 ```
-- Builds frontend to dist/public
-- Bundles backend to dist/index.js
+- Builds frontend to dist/ directory
+- Optimizes assets and bundles code
 
-**Start Production Server:**
+**Preview Production Build:**
 ```bash
-cd FoodDelivery && npm start
+cd FoodDelivery && npm run preview
 ```
-- Serves static files from dist/public
+- Serves production build locally
 - Runs on port 5000
 
 ## Deployment
 
 The application is configured for autoscale deployment:
 - Build command: `npm run build`
-- Run command: `npm start`
+- Run command: `npm run preview`
 - Port: 5000
-- Suitable for stateless web applications
+- Pure frontend application with localStorage persistence
