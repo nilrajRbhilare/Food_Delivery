@@ -1,0 +1,130 @@
+🍽️ Goal
+
+Build a frontend-only restaurant order management system using React (or any frontend framework) where:
+
+Admin metrics update only after an order is accepted.
+
+User’s Track Orders panel updates dynamically whenever the admin updates the order status.
+
+All data should be handled using JSON objects or frontend state (useState/useEffect) — no backend or database.
+
+⚙️ 1. Order Creation (User Side)
+
+When a user places an order, it should initially have the status:
+
+{ "status": "New" }
+
+
+This new order should appear only in:
+Admin → SideBar → Orders → Order Management → “New” section.
+
+Metrics should NOT update yet when the user places the order.
+Metrics must remain the same until admin takes action.
+
+🧾 2. Admin → Order Management → “New” Section
+
+Shows all orders with "status": "New".
+
+Each order card should have two action buttons:
+
+✅ Accept Order → changes status to "Preparing".
+
+❌ Deny Order → changes status to "Denied".
+
+After Accept:
+
+The order moves to the “Preparing” section.
+
+Metrics update at this moment:
+
+Increase Active Orders count.
+
+Optionally, calculate Pending Revenue or Accepted Orders.
+
+The User’s Track Orders view updates automatically to show:
+
+“Your order has been accepted and is being prepared.”
+
+After Deny:
+
+The order moves to a “Denied” state (optional list or hidden).
+
+The User’s Track Orders should show:
+
+“Your order was denied by the restaurant.”
+
+🍳 3. Admin → “Preparing” Section
+
+Displays orders where "status": "Preparing".
+
+Each order card includes a button:
+
+🍲 Prepared → changes status to "Ready".
+
+After clicking:
+
+The order moves to the “Ready” section.
+
+The User’s Track Orders automatically updates to:
+
+“Your order is ready for delivery.”
+
+🧺 4. Admin → “Ready” Section
+
+Displays orders with "status": "Ready".
+
+Each order card includes a button:
+
+🚚 Deliver → changes status to "Delivered".
+
+When clicked:
+
+The order moves to “Past Orders”.
+
+The User’s Track Orders updates to:
+
+“Your order has been delivered.”
+
+Metrics update again:
+
+Increase Delivered Orders count.
+
+Increase Total Revenue (if applicable).
+
+Decrease Active Orders.
+
+📦 5. Admin → “Past Orders” Section
+
+Displays all orders with "status": "Delivered".
+
+Read-only section showing final order summaries.
+
+Acts as order history for admin reference.
+
+📊 6. Admin → Metrics Panel
+
+The metrics should update dynamically only after admin actions, following these rules:
+
+Metric	When to Update	Source
+Total Orders	When user places new order	All orders
+Active Orders	When admin accepts an order	status = “Preparing” or “Ready”
+Delivered Orders	When admin delivers an order	status = “Delivered”
+Denied Orders	When admin denies an order	status = “Denied”
+Total Revenue	When order delivered	Sum of delivered order totals
+
+Metrics should not change until admin accepts or delivers an order.
+
+👨‍🍳 7. User → Track Orders Panel
+
+The “Track Orders” section in the user dashboard should reflect real-time order progress (based on order status updates in JSON/state).
+
+Order status messages:
+
+Status	User Message
+New	“Waiting for restaurant confirmation”
+Preparing	“Order accepted, being prepared”
+Ready	“Order ready for delivery”
+Delivered	“Order delivered successfully”
+Denied	“Order was denied by restaurant”
+
+Whenever the admin updates an order’s status, the user’s “Track Orders” view should automatically refresh and show the updated message.

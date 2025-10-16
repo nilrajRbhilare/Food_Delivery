@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { ArrowLeft, Package, Clock, Truck, CheckCircle2, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Package, Clock, Truck, CheckCircle2, ShoppingBag, XCircle, HelpCircle, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ interface Order {
   items: string[];
   total: number;
   restaurant: string;
-  status: "Preparing" | "On the Way" | "Delivered";
+  status: "New" | "Preparing" | "On the Way" | "Delivered" | "Denied";
   deliveryDate: string;
   deliveryTime: string;
   paymentMethod?: string;
@@ -19,9 +19,11 @@ interface Order {
 }
 
 const statusConfig = {
-  Preparing: { icon: Clock, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-950" },
-  "On the Way": { icon: Truck, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-950" },
-  Delivered: { icon: CheckCircle2, color: "text-green-500", bgColor: "bg-green-100 dark:bg-green-950" },
+  New: { icon: HelpCircle, color: "text-gray-500", bgColor: "bg-gray-100 dark:bg-gray-950", message: "Waiting for restaurant confirmation" },
+  Preparing: { icon: ChefHat, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-950", message: "Order accepted, being prepared" },
+  "On the Way": { icon: Truck, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-950", message: "Order ready for delivery" },
+  Delivered: { icon: CheckCircle2, color: "text-green-500", bgColor: "bg-green-100 dark:bg-green-950", message: "Order delivered successfully" },
+  Denied: { icon: XCircle, color: "text-red-500", bgColor: "bg-red-100 dark:bg-red-950", message: "Order was denied by restaurant" },
 };
 
 export default function TrackOrder() {
@@ -98,6 +100,23 @@ export default function TrackOrder() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Status Message */}
+                  <div className="p-4 rounded-lg bg-muted">
+                    <div className="flex items-center gap-3">
+                      {(() => {
+                        const StatusIcon = statusConfig[currentOrder.status]?.icon || HelpCircle;
+                        const color = statusConfig[currentOrder.status]?.color || "text-gray-500";
+                        return <StatusIcon className={`h-6 w-6 ${color}`} />;
+                      })()}
+                      <div>
+                        <p className="text-sm text-muted-foreground">Current Status</p>
+                        <p className="font-semibold" data-testid="status-message">
+                          {statusConfig[currentOrder.status]?.message || "Order status unknown"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1 space-y-3">
                       <div>
@@ -127,40 +146,44 @@ export default function TrackOrder() {
 
                   <Separator />
 
-                  <div className="space-y-4">
-                    <p className="font-medium">Order Status</p>
-                    <div className="flex items-center justify-between gap-4">
-                      {(["Preparing", "On the Way", "Delivered"] as const).map((status, idx) => {
-                        const config = statusConfig[status];
-                        if (!config) return null;
-                        
-                        const StatusIcon = config.icon;
-                        const isActive = currentOrder.status === status;
-                        const isPast = orders.indexOf(currentOrder) !== -1 && 
-                          (status === "Preparing" || 
-                           (status === "On the Way" && currentOrder.status === "Delivered"));
-                        
-                        return (
-                          <div key={status} className="flex-1 flex items-center gap-2">
-                            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                              isActive || isPast ? config.bgColor : "bg-muted"
-                            }`}>
-                              <StatusIcon className={`h-5 w-5 ${
-                                isActive || isPast ? config.color : "text-muted-foreground"
-                              }`} />
+                  {/* Status Timeline - Only show if not New or Denied */}
+                  {currentOrder.status !== "Denied" && currentOrder.status !== "New" && (
+                    <div className="space-y-4">
+                      <p className="font-medium">Order Progress</p>
+                      <div className="flex items-center justify-between gap-4">
+                        {(["Preparing", "On the Way", "Delivered"] as const).map((status) => {
+                          const config = statusConfig[status];
+                          if (!config) return null;
+                          
+                          const StatusIcon = config.icon;
+                          const isActive = currentOrder.status === status;
+                          const statusOrder = { "Preparing": 1, "On the Way": 2, "Delivered": 3 };
+                          const currentStatusOrder = statusOrder[currentOrder.status as keyof typeof statusOrder] || 0;
+                          const thisStatusOrder = statusOrder[status];
+                          const isPast = currentStatusOrder > thisStatusOrder;
+                          
+                          return (
+                            <div key={status} className="flex-1 flex items-center gap-2">
+                              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                                isActive || isPast ? config.bgColor : "bg-muted"
+                              }`}>
+                                <StatusIcon className={`h-5 w-5 ${
+                                  isActive || isPast ? config.color : "text-muted-foreground"
+                                }`} />
+                              </div>
+                              <div className="flex-1">
+                                <p className={`text-sm font-medium ${
+                                  isActive || isPast ? "" : "text-muted-foreground"
+                                }`} data-testid={`status-${status.toLowerCase().replace(" ", "-")}`}>
+                                  {status}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <p className={`text-sm font-medium ${
-                                isActive || isPast ? "" : "text-muted-foreground"
-                              }`} data-testid={`status-${status.toLowerCase().replace(" ", "-")}`}>
-                                {status}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -179,6 +202,9 @@ export default function TrackOrder() {
                       </div>
                     </CardHeader>
                     <CardContent>
+                      <div className="mb-4 p-3 rounded-lg bg-muted/50 text-sm">
+                        {statusConfig[order.status]?.message || "Order status unknown"}
+                      </div>
                       <div className="grid md:grid-cols-4 gap-4">
                         <div>
                           <p className="text-sm text-muted-foreground">Restaurant</p>
