@@ -2,11 +2,36 @@
 
 ## Overview
 
-FoodHub is a modern food delivery web application built as a frontend-focused React prototype. The application allows users to browse restaurants, search for food items, manage a shopping cart, and simulate the checkout process. It features a responsive design with support for light/dark themes, location selection with map integration, and a comprehensive filtering system for food discovery.
+FoodHub is a modern food delivery web application built with React and TypeScript. The application allows users to browse restaurants, search for food items, manage a shopping cart, track orders, and complete payments. It features a responsive design with support for light/dark themes, location selection with map integration, and a comprehensive filtering system for food discovery.
 
-This is currently a **frontend-only prototype** with mock data and simulated interactions. The backend infrastructure is minimal, with a basic Express server setup that's ready for future API integration.
+The frontend is now **fully prepared for Spring Boot + MySQL backend integration** with a complete API service layer and authentication system.
 
 ## Recent Changes
+
+**October 17, 2025** - Backend Integration Preparation:
+- ✅ Created comprehensive API service layer (`services/api.ts`)
+  - REST API client with all CRUD operations
+  - Authorization header support with JWT token management
+  - Proper error handling for all response types (including 204 No Content)
+  - Environment-based API URL configuration
+- ✅ Updated DataContext to use API instead of localStorage
+  - Async data loading from backend
+  - Error state management
+  - Loading state tracking
+- ✅ Updated AuthContext to use async API authentication
+  - JWT token storage and header injection
+  - Proper admin registration flow with restaurant creation
+  - Session persistence with localStorage backup
+- ✅ Updated AuthModal for async login/register
+  - Loading states during authentication
+  - Proper error handling and user feedback
+- ✅ Added environment configuration (.env, .env.example)
+  - VITE_API_URL for backend connection
+  - Default: http://localhost:8080/api
+- ✅ Frontend is now ready to connect to Spring Boot backend
+  - All API endpoints defined and typed
+  - Authorization flow implemented
+  - Error boundaries in place
 
 **October 16, 2025** - Fixed Critical Loading & Routing Issues:
 - ✅ **Resolved skeleton loader bug** - Home page now correctly displays 19 menu items from DataContext
