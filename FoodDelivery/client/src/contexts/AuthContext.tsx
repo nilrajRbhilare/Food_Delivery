@@ -125,6 +125,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userType: userData.userType
       });
 
+      const publicUserData: PublicUserData = {
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        phone: response.phone,
+        userType: response.userType
+      };
+
+      setUser(publicUserData);
+      setIsAuthenticated(true);
+      localStorage.setItem(USER_KEY, JSON.stringify(publicUserData));
+      localStorage.setItem(TOKEN_KEY, 'temp-token');
+
       if (userData.userType === 'admin' && addRestaurant) {
         const restaurantId = response.id || `REST-${Date.now()}`;
         const defaultAdminProfile: AdminData = {
@@ -138,26 +151,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         saveAdminProfile(userData.email, defaultAdminProfile);
         setAdminProfile(defaultAdminProfile);
 
-        await addRestaurant({
-          name: userData.restaurantName || 'My Restaurant',
-          location: userData.restaurantLocation || 'Not Set',
-          adminEmail: userData.email,
-          rating: 4.0
-        });
+        try {
+          await addRestaurant({
+            name: userData.restaurantName || 'My Restaurant',
+            location: userData.restaurantLocation || 'Not Set',
+            adminEmail: userData.email,
+            rating: 4.0
+          });
+        } catch (restaurantErr) {
+          console.error('Failed to create restaurant:', restaurantErr);
+        }
       }
-
-      const publicUserData: PublicUserData = {
-        id: response.id,
-        name: response.name,
-        email: response.email,
-        phone: response.phone,
-        userType: response.userType
-      };
-
-      setUser(publicUserData);
-      setIsAuthenticated(true);
-      localStorage.setItem(USER_KEY, JSON.stringify(publicUserData));
-      localStorage.setItem(TOKEN_KEY, 'temp-token');
       
       return true;
     } catch (err) {
