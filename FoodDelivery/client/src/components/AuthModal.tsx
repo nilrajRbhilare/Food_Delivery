@@ -33,7 +33,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [restaurantName, setRestaurantName] = useState("");
   const [restaurantLocation, setRestaurantLocation] = useState("");
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!signInEmail || !signInPassword) {
       toast({
         title: "Error",
@@ -43,11 +43,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    const success = login(signInEmail, signInPassword);
+    const success = await login(signInEmail, signInPassword);
     
     if (success) {
-      const users = JSON.parse(localStorage.getItem('foodhub_users') || '[]');
-      const user = users.find((u: any) => u.email === signInEmail);
+      const storedUser = localStorage.getItem('foodhub_user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
       
       toast({
         title: "Welcome back!",
@@ -69,7 +69,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!signUpUsername || !signUpName || !signUpEmail || !signUpPassword) {
       toast({
         title: "Error",
@@ -88,7 +88,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
     
-    const success = register({
+    const success = await register({
       username: signUpUsername,
       name: signUpName,
       email: signUpEmail,
