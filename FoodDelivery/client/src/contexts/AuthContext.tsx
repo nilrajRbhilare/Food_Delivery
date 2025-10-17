@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { api } from "@/services/api";
 import { Restaurant } from "./DataContext";
 
 interface Order {
@@ -29,12 +30,13 @@ interface UserData {
 }
 
 interface PublicUserData {
-  username: string;
+  id?: string;
+  username?: string;
   name: string;
   email: string;
-  phone: string;
-  address: string;
-  orders: Order[];
+  phone?: string;
+  address?: string;
+  orders?: Order[];
   avatar?: string;
   userType: "customer" | "admin";
 }
@@ -51,44 +53,46 @@ interface AdminData {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: PublicUserData | null;
-  login: (email: string, password: string) => boolean;
-  register: (userData: Omit<UserData, 'orders'>, addRestaurant?: (restaurant: Restaurant) => void) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: Omit<UserData, 'orders'>, addRestaurant?: (restaurant: Omit<Restaurant, 'id' | 'createdAt'>) => Promise<void>) => Promise<boolean>;
   logout: () => void;
-  updateUser: (userData: Partial<PublicUserData>) => void;
-  addOrder: (order: Order) => void;
+  updateUser: (userData: Partial<PublicUserData>) => Promise<void>;
+  addOrder: (order: Omit<Order, 'id'> & { userId: string }) => Promise<void>;
   adminProfile: AdminData | null;
   updateAdminProfile: (data: Partial<AdminData>) => void;
+  loading: boolean;
+  error: string | null;
 }
 
 export type { UserData, PublicUserData, AdminData, Order };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const USERS_KEY = 'foodhub_users';
-const CURRENT_USER_KEY = 'foodhub_current_user';
+const USER_KEY = 'foodhub_user';
+const TOKEN_KEY = 'foodhub_token';
 const ADMIN_PROFILES_KEY = 'foodhub_admin_profiles';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<PublicUserData | null>(null);
   const [adminProfile, setAdminProfile] = useState<AdminData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const currentUserEmail = localStorage.getItem(CURRENT_USER_KEY);
-    if (currentUserEmail) {
-      const users = getUsersFromStorage();
-      const foundUser = users.find(u => u.email === currentUserEmail);
-      if (foundUser) {
-        const { password, ...publicData } = foundUser;
-        setUser(publicData);
-        setIsAuthenticated(true);
-        
-        if (foundUser.userType === 'admin') {
-          const adminProfiles = getAdminProfilesFromStorage();
-          const profile = adminProfiles[foundUser.email];
-          if (profile) {
-            setAdminProfile(profile);
-          }
+    const storedUser = localStorage.getItem(USER_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
+    
+    if (storedUser && token) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      if (userData.userType === 'admin') {
+        const adminProfiles = getAdminProfilesFromStorage();
+        const profile = adminProfiles[userData.email];
+        if (profile) {
+          setAdminProfile(profile);
         }
       }
     }
@@ -105,80 +109,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(ADMIN_PROFILES_KEY, JSON.stringify(profiles));
   };
 
-  const getUsersFromStorage = (): UserData[] => {
-    const usersJson = localStorage.getItem(USERS_KEY);
-    return usersJson ? JSON.parse(usersJson) : [];
-  };
+  const register = async (
+    userData: Omit<UserData, 'orders'>, 
+    addRestaurant?: (restaurant: Omit<Restaurant, 'id' | 'createdAt'>) => Promise<void>
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const saveUsersToStorage = (users: UserData[]) => {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  };
+      const response = await api.register({
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        phone: userData.phone,
+        userType: userData.userType
+      });
 
-  const register = (userData: Omit<UserData, 'orders'>, addRestaurant?: (restaurant: Restaurant) => void): boolean => {
-    const users = getUsersFromStorage();
-    
-    if (users.some(u => u.email === userData.email)) {
-      return false;
-    }
+      if (userData.userType === 'admin' && addRestaurant) {
+        const restaurantId = response.id || `REST-${Date.now()}`;
+        const defaultAdminProfile: AdminData = {
+          restaurantName: userData.restaurantName || 'My Restaurant',
+          restaurantId,
+          branches: '1',
+          location: userData.restaurantLocation || 'Not Set',
+          contact: userData.phone || 'Not Set',
+          managerName: userData.name || 'Not Set'
+        };
+        saveAdminProfile(userData.email, defaultAdminProfile);
+        setAdminProfile(defaultAdminProfile);
 
-    if (users.some(u => u.username === userData.username)) {
-      return false;
-    }
-
-    const newUser: UserData = {
-      ...userData,
-      orders: []
-    };
-
-    users.push(newUser);
-    saveUsersToStorage(users);
-
-    if (userData.userType === 'admin') {
-      const restaurantId = `REST-${Date.now()}`;
-      const defaultAdminProfile: AdminData = {
-        restaurantName: userData.restaurantName || 'My Restaurant',
-        restaurantId,
-        branches: '1',
-        location: userData.restaurantLocation || 'Not Set',
-        contact: userData.phone || 'Not Set',
-        managerName: userData.name || 'Not Set'
-      };
-      saveAdminProfile(userData.email, defaultAdminProfile);
-      setAdminProfile(defaultAdminProfile);
-
-      // Register restaurant in unified data system
-      if (addRestaurant) {
-        const restaurant: Restaurant = {
-          id: restaurantId,
+        await addRestaurant({
           name: userData.restaurantName || 'My Restaurant',
           location: userData.restaurantLocation || 'Not Set',
           adminEmail: userData.email,
-          rating: 4.0,
-          createdAt: new Date().toISOString()
-        };
-        addRestaurant(restaurant);
+          rating: 4.0
+        });
       }
-    }
 
-    const { password, ...publicData } = newUser;
-    setUser(publicData);
-    setIsAuthenticated(true);
-    localStorage.setItem(CURRENT_USER_KEY, userData.email);
-    
-    return true;
+      const publicUserData: PublicUserData = {
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        phone: response.phone,
+        userType: response.userType
+      };
+
+      setUser(publicUserData);
+      setIsAuthenticated(true);
+      localStorage.setItem(USER_KEY, JSON.stringify(publicUserData));
+      localStorage.setItem(TOKEN_KEY, 'temp-token');
+      
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const login = (email: string, password: string): boolean => {
-    const users = getUsersFromStorage();
-    const foundUser = users.find(u => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      const { password: _, ...publicData } = foundUser;
-      setUser(publicData);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.login({ email, password });
+
+      const publicUserData: PublicUserData = {
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        phone: response.user.phone,
+        userType: response.user.userType
+      };
+
+      setUser(publicUserData);
       setIsAuthenticated(true);
-      localStorage.setItem(CURRENT_USER_KEY, email);
+      localStorage.setItem(USER_KEY, JSON.stringify(publicUserData));
+      localStorage.setItem(TOKEN_KEY, response.token || 'temp-token');
       
-      if (foundUser.userType === 'admin') {
+      if (response.user.userType === 'admin') {
         const adminProfiles = getAdminProfilesFromStorage();
         const profile = adminProfiles[email];
         if (profile) {
@@ -187,43 +198,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
     }
-    
-    return false;
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
     setAdminProfile(null);
-    localStorage.removeItem(CURRENT_USER_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
   };
 
-  const updateUser = (userData: Partial<PublicUserData>) => {
-    if (user) {
-      const users = getUsersFromStorage();
-      const userIndex = users.findIndex(u => u.email === user.email);
-      
-      if (userIndex !== -1) {
-        users[userIndex] = { ...users[userIndex], ...userData };
-        saveUsersToStorage(users);
-        
-        setUser({ ...user, ...userData });
+  const updateUser = async (userData: Partial<PublicUserData>) => {
+    if (user && user.id) {
+      try {
+        setError(null);
+        const updatedUser = await api.updateUser(user.id, userData);
+        const publicUserData: PublicUserData = {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          userType: updatedUser.userType
+        };
+        setUser(publicUserData);
+        localStorage.setItem(USER_KEY, JSON.stringify(publicUserData));
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
+        setError(errorMessage);
+        throw err;
       }
     }
   };
 
-  const addOrder = (order: Order) => {
-    if (user) {
-      const users = getUsersFromStorage();
-      const userIndex = users.findIndex(u => u.email === user.email);
-      
-      if (userIndex !== -1) {
-        users[userIndex].orders.unshift(order);
-        saveUsersToStorage(users);
-        
-        setUser({ ...user, orders: users[userIndex].orders });
-      }
+  const addOrder = async (order: Omit<Order, 'id'> & { userId: string }) => {
+    try {
+      setError(null);
+      await api.createOrder({
+        userId: order.userId,
+        restaurantId: order.restaurantId || '',
+        totalAmount: order.total,
+        status: order.status,
+        deliveryAddress: '',
+        items: []
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create order';
+      setError(errorMessage);
+      throw err;
     }
   };
 
@@ -236,7 +264,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, register, logout, updateUser, addOrder, adminProfile, updateAdminProfile }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      user, 
+      login, 
+      register, 
+      logout, 
+      updateUser, 
+      addOrder, 
+      adminProfile, 
+      updateAdminProfile,
+      loading,
+      error
+    }}>
       {children}
     </AuthContext.Provider>
   );
