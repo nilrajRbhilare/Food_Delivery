@@ -6,7 +6,7 @@ export interface Restaurant {
   location: string;
   adminEmail: string;
   rating: number;
-  image: string;
+  image?: string;
   createdAt: string;
 }
 

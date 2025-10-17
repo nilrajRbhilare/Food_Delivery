@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { foodItems as mockFoodItems } from "@/lib/mockData";
+import { api } from "@/services/api";
 
 export interface Restaurant {
   id: string;
@@ -22,159 +22,127 @@ export interface MenuItem {
   category: string;
   isVeg: boolean;
   offer?: string;
-  description: string;
-  available: boolean;
+  description?: string;
+  available?: boolean;
 }
 
 interface DataContextType {
   restaurants: Restaurant[];
   menuItems: MenuItem[];
   isInitialized: boolean;
-  addRestaurant: (restaurant: Restaurant) => void;
-  updateRestaurant: (id: string, data: Partial<Restaurant>) => void;
-  addMenuItem: (item: MenuItem) => void;
-  updateMenuItem: (id: string, data: Partial<MenuItem>) => void;
-  deleteMenuItem: (id: string) => void;
+  loading: boolean;
+  error: string | null;
+  addRestaurant: (restaurant: Omit<Restaurant, 'id' | 'createdAt'>) => Promise<void>;
+  updateRestaurant: (id: string, data: Partial<Restaurant>) => Promise<void>;
+  addMenuItem: (item: Omit<MenuItem, 'id'>) => Promise<void>;
+  updateMenuItem: (id: string, data: Partial<MenuItem>) => Promise<void>;
+  deleteMenuItem: (id: string) => Promise<void>;
   getRestaurantMenuItems: (restaurantId: string) => MenuItem[];
-  refreshData: () => void;
+  refreshData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
-
-const RESTAURANTS_KEY = 'foodhub_restaurants';
-const MENU_ITEMS_KEY = 'foodhub_menu_items';
-const INITIALIZED_KEY = 'foodhub_data_initialized';
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    initializeData();
-    
-    // Listen for localStorage changes from other tabs/windows
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === RESTAURANTS_KEY || e.key === MENU_ITEMS_KEY) {
-        loadData();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    loadData();
   }, []);
 
-  const initializeData = () => {
-    const isInitialized = localStorage.getItem(INITIALIZED_KEY);
-    const existingRestaurants = localStorage.getItem(RESTAURANTS_KEY);
-    const existingMenuItems = localStorage.getItem(MENU_ITEMS_KEY);
-    
-    // Only load existing data if all pieces are present
-    if (isInitialized && existingRestaurants && existingMenuItems) {
-      loadData();
-      return;
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [restaurantsData, menuItemsData] = await Promise.all([
+        api.getAllRestaurants(),
+        api.getAllMenuItems()
+      ]);
+      
+      setRestaurants(restaurantsData);
+      setMenuItems(menuItemsData);
+      setIsInitialized(true);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
+      setError(errorMessage);
+      console.error('Error loading data:', err);
+      setIsInitialized(true);
+    } finally {
+      setLoading(false);
     }
-    
-    // Create fresh mock data
-    const mockRestaurants: Restaurant[] = [];
-    const restaurantMap = new Map<string, Restaurant>();
-    
-    // Extract unique restaurants from mock food items
-    mockFoodItems.forEach(item => {
-      if (!restaurantMap.has(item.restaurant)) {
-        const restaurant: Restaurant = {
-          id: `MOCK-${Date.now()}-${restaurantMap.size}`,
-          name: item.restaurant,
-          location: "Mock Location",
-          adminEmail: "mock@foodhub.com",
-          rating: item.rating,
-          image: item.image,
-          createdAt: new Date().toISOString()
-        };
-        restaurantMap.set(item.restaurant, restaurant);
-        mockRestaurants.push(restaurant);
-      }
-    });
-
-    // Convert mock food items to menu items with restaurant IDs
-    const mockMenuItems: MenuItem[] = mockFoodItems.map(item => {
-      const restaurant = restaurantMap.get(item.restaurant)!;
-      return {
-        id: `MOCK-${item.id}`,
-        name: item.name,
-        restaurantId: restaurant.id,
-        restaurantName: restaurant.name,
-        rating: item.rating,
-        price: item.price,
-        image: item.image,
-        category: item.category,
-        isVeg: item.isVeg,
-        offer: item.offer,
-        description: item.description,
-        available: true
-      };
-    });
-
-    localStorage.setItem(RESTAURANTS_KEY, JSON.stringify(mockRestaurants));
-    localStorage.setItem(MENU_ITEMS_KEY, JSON.stringify(mockMenuItems));
-    localStorage.setItem(INITIALIZED_KEY, 'true');
-    
-    setRestaurants(mockRestaurants);
-    setMenuItems(mockMenuItems);
-    setIsInitialized(true);
   };
 
-  const loadData = () => {
-    const restaurantsJson = localStorage.getItem(RESTAURANTS_KEY);
-    const menuItemsJson = localStorage.getItem(MENU_ITEMS_KEY);
-    
-    if (restaurantsJson) {
-      setRestaurants(JSON.parse(restaurantsJson));
+  const addRestaurant = async (restaurant: Omit<Restaurant, 'id' | 'createdAt'>) => {
+    try {
+      setError(null);
+      const newRestaurant = await api.createRestaurant(restaurant);
+      setRestaurants(prev => [...prev, newRestaurant]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add restaurant';
+      setError(errorMessage);
+      throw err;
     }
-    
-    if (menuItemsJson) {
-      setMenuItems(JSON.parse(menuItemsJson));
+  };
+
+  const updateRestaurant = async (id: string, data: Partial<Restaurant>) => {
+    try {
+      setError(null);
+      const updatedRestaurant = await api.updateRestaurant(id, data);
+      setRestaurants(prev => prev.map(r => r.id === id ? updatedRestaurant : r));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update restaurant';
+      setError(errorMessage);
+      throw err;
     }
-    
-    setIsInitialized(true);
   };
 
-  const addRestaurant = (restaurant: Restaurant) => {
-    const updated = [...restaurants, restaurant];
-    setRestaurants(updated);
-    localStorage.setItem(RESTAURANTS_KEY, JSON.stringify(updated));
+  const addMenuItem = async (item: Omit<MenuItem, 'id'>) => {
+    try {
+      setError(null);
+      const newItem = await api.createMenuItem(item);
+      setMenuItems(prev => [...prev, newItem]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add menu item';
+      setError(errorMessage);
+      throw err;
+    }
   };
 
-  const updateRestaurant = (id: string, data: Partial<Restaurant>) => {
-    const updated = restaurants.map(r => r.id === id ? { ...r, ...data } : r);
-    setRestaurants(updated);
-    localStorage.setItem(RESTAURANTS_KEY, JSON.stringify(updated));
+  const updateMenuItem = async (id: string, data: Partial<MenuItem>) => {
+    try {
+      setError(null);
+      const updatedItem = await api.updateMenuItem(id, data);
+      setMenuItems(prev => prev.map(item => item.id === id ? updatedItem : item));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update menu item';
+      setError(errorMessage);
+      throw err;
+    }
   };
 
-  const addMenuItem = (item: MenuItem) => {
-    const updated = [...menuItems, item];
-    setMenuItems(updated);
-    localStorage.setItem(MENU_ITEMS_KEY, JSON.stringify(updated));
-  };
-
-  const updateMenuItem = (id: string, data: Partial<MenuItem>) => {
-    const updated = menuItems.map(item => item.id === id ? { ...item, ...data } : item);
-    setMenuItems(updated);
-    localStorage.setItem(MENU_ITEMS_KEY, JSON.stringify(updated));
-  };
-
-  const deleteMenuItem = (id: string) => {
-    const updated = menuItems.filter(item => item.id !== id);
-    setMenuItems(updated);
-    localStorage.setItem(MENU_ITEMS_KEY, JSON.stringify(updated));
+  const deleteMenuItem = async (id: string) => {
+    try {
+      setError(null);
+      await api.deleteMenuItem(id);
+      setMenuItems(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete menu item';
+      setError(errorMessage);
+      throw err;
+    }
   };
 
   const getRestaurantMenuItems = (restaurantId: string) => {
     return menuItems.filter(item => item.restaurantId === restaurantId);
   };
 
-  const refreshData = () => {
-    loadData();
+  const refreshData = async () => {
+    await loadData();
   };
 
   return (
@@ -182,6 +150,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       restaurants,
       menuItems,
       isInitialized,
+      loading,
+      error,
       addRestaurant,
       updateRestaurant,
       addMenuItem,
